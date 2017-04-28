@@ -1,6 +1,8 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <thread>
+#include <random>
 #include <config.h>
 #include <systemd/sd-bus.h>
 #include <sdbusplus/server.hpp>
@@ -132,6 +134,9 @@ int main()
         std::string power_policy = getProperty(bus, SETTINGS_PATH,
                                                SETTINGS_INTERFACE,
                                                "power_policy");
+        std::string power_on_delay = getProperty(bus, SETTINGS_PATH,
+                                               SETTINGS_INTERFACE,
+                                               "power_on_delay");
 
         log<level::INFO>("Host power is off, checking power policy",
                          entry("POWER_POLICY=%s", power_policy.c_str()));
@@ -139,6 +144,12 @@ int main()
         if (power_policy == "ALWAYS_POWER_ON")
         {
             log<level::INFO>("power_policy=ALWAYS_POWER_ON, powering host on");
+            std::mt19937 gen(std::random_device{}());
+            std::uniform_int_distribution<> dis(0, std::stoi(power_on_delay));
+            int delay = dis(gen);
+            log<level::INFO>("power_on_delay=%s",entry(std::to_string(delay)));
+            std::this_thread::sleep_for(std::chrono::seconds(delay));
+
             setProperty(bus, HOST_PATH, HOST_BUSNAME,
                         "RequestedHostTransition",
                         convertForMessage(server::Host::Transition::On));

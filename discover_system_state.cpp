@@ -147,7 +147,7 @@ int main()
             std::mt19937 gen(std::random_device{}());
             std::uniform_int_distribution<> dis(0, std::stoi(power_on_delay));
             int delay = dis(gen);
-            log<level::INFO>("power_on_delay=%s",entry(std::to_string(delay)));
+            log<level::ERR>("power_on_delay=%s",entry(std::to_string(delay)));
             std::this_thread::sleep_for(std::chrono::seconds(delay));
 
             setProperty(bus, HOST_PATH, HOST_BUSNAME,
